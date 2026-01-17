@@ -37,10 +37,11 @@ Use these rules for the FactionPicker Firebase Realtime Database:
 ## Key Changes
 
 **Removed validation on votes:**
-- Previously had `.validate: "newData.hasChildren()"` which rejected null values and empty arrays
-- Now allows `null` values, which represent "no preference for any faction"
-- Note: Firebase Realtime Database doesn't store empty arrays - they're converted to null automatically
-- Votes can be: an array of faction names (preferences) or `null` (no preferences)
+- Previously had `.validate: "newData.hasChildren()"` which rejected certain vote values
+- Now allows all vote formats without validation
+- Note: Firebase Realtime Database doesn't store empty arrays or null values - they delete the node
+- Votes can be: an array of faction names (preferences) or `[null]` (sentinel for "no preferences")
+- The `[null]` sentinel is a workaround since Firebase deletes nodes set to null or []
 - This is a valid vote state and needs to be recorded so results can be calculated
 
 ## What These Rules Allow

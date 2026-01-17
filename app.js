@@ -322,8 +322,9 @@ async function submitVote() {
         .map(select => select.value)
         .filter(value => value !== ''); // Only include actual preferences, not "No Preference"
 
-    // Firebase doesn't store empty arrays, so use null for "no preferences"
-    const voteData = ranking.length > 0 ? ranking : null;
+    // Firebase doesn't store empty arrays or null (deletes the node)
+    // Use array with single null element as sentinel for "no preferences"
+    const voteData = ranking.length > 0 ? ranking : [null];
 
     try {
         await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(voteData);
@@ -425,7 +426,9 @@ function calculateAssignments(players, factions, votes) {
     // Create preference matrix
     const preferences = {};
     players.forEach(player => {
-        preferences[player] = votes[player] || [];
+        const vote = votes[player] || [];
+        // Convert [null] sentinel to empty array (no preferences)
+        preferences[player] = (vote.length === 1 && vote[0] === null) ? [] : vote;
     });
 
     // Assign factions iteratively
@@ -486,7 +489,11 @@ function displayAssignments(assignments, votes) {
     const allVotesList = document.getElementById('allVotesList');
     allVotesList.innerHTML = Object.entries(votes)
         .map(([player, ranking]) => {
-            const rankingDisplay = ranking && ranking.length > 0
+            // Check if it's a "no preferences" vote ([null] sentinel)
+            const isNoPreference = ranking && ranking.length === 1 && ranking[0] === null;
+            const hasPreferences = ranking && ranking.length > 0 && !isNoPreference;
+
+            const rankingDisplay = hasPreferences
                 ? `<ol>${ranking.map(faction => `<li>${faction}</li>`).join('')}</ol>`
                 : `<p style="color: #888; font-style: italic;">No preferences specified</p>`;
 
