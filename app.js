@@ -10,14 +10,14 @@ function decodeConfig(encoded) {
 
 // Firebase configuration (sensitive values are base64+rot13 encoded)
 const firebaseConfig = {
-    apiKey: decodeConfig("NUvmnIl6Ouu_m0wWwA0gswY4ot1zMHUnncONKm3mCInyrtONRunfskn=="),
+    apiKey: decodeConfig("DHy6LIA5DzusATcXZ3EzAwuhGKAMDJSkLxSsrx9HqwW4LxSSnS9e"),
     authDomain: "factionpicker.firebaseapp.com",
     databaseURL: "https://factionpicker-default-rtdb.firebaseio.com",
     projectId: "factionpicker",
     storageBucket: "factionpicker.firebasestorage.app",
-    messagingSenderId: decodeConfig("MDk4NTUwMjU0MTQy"),
-    appId: decodeConfig("MToyOTg4NTAyNTQxNDI6d2VyOmVvNm5yMTMzYzA1cDMxcXNycTgwNnM="),
-    measurementId: decodeConfig("Ry1BETPRRGAMMUg=")
+    messagingSenderId: decodeConfig("Zwx4BQHjZwH0ZGDl"),
+    appId: decodeConfig("ZGblBGt4AGNlAGDkAQV6q2IvBzIvAzSyZGZmLmN1MQZkMTMyMQtjAzL="),
+    measurementId: decodeConfig("El1BGRASEIEBJxtm")
 };
 
 // Initialize Firebase
