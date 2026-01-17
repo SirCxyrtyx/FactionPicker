@@ -1,12 +1,23 @@
-// Firebase configuration - REPLACE WITH YOUR OWN CONFIG
+// Decoder for obfuscated config values (base64 + rot13)
+function decodeConfig(encoded) {
+    // ROT13 decode (symmetric operation)
+    const rot13decoded = encoded.replace(/[A-Za-z]/g, c =>
+        String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)
+    );
+    // Base64 decode
+    return atob(rot13decoded);
+}
+
+// Firebase configuration (sensitive values are base64+rot13 encoded)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: decodeConfig("NUvmnIl6Ouu_m0wWwA0gswY4ot1zMHUnncONKm3mCInyrtONRunfskn=="),
+    authDomain: "factionpicker.firebaseapp.com",
+    databaseURL: "https://factionpicker-default-rtdb.firebaseio.com",
+    projectId: "factionpicker",
+    storageBucket: "factionpicker.firebasestorage.app",
+    messagingSenderId: decodeConfig("MDk4NTUwMjU0MTQy"),
+    appId: decodeConfig("MToyOTg4NTAyNTQxNDI6d2VyOmVvNm5yMTMzYzA1cDMxcXNycTgwNnM="),
+    measurementId: decodeConfig("Ry1BETPRRGAMMUg=")
 };
 
 // Initialize Firebase
