@@ -339,6 +339,26 @@ async function submitVote() {
     try {
         await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(ranking);
 
+        // Check if this was the last vote and calculate results if needed
+        const sessionSnapshot = await database.ref(`sessions/${currentSessionId}`).once('value');
+        const sessionData = sessionSnapshot.val();
+
+        if (sessionData) {
+            const allVoted = sessionData.players.every(player =>
+                sessionData.votes && sessionData.votes[player]
+            );
+
+            // If all votes are in and results don't exist, calculate and store them
+            if (allVoted && !sessionData.results) {
+                const assignments = calculateAssignments(
+                    sessionData.players,
+                    sessionData.factions,
+                    sessionData.votes
+                );
+                await database.ref(`sessions/${currentSessionId}/results`).set(assignments);
+            }
+        }
+
         document.getElementById('votingSection').classList.add('hidden');
         document.getElementById('voteConfirmation').classList.remove('hidden');
     } catch (error) {
@@ -353,7 +373,7 @@ async function loadResults() {
         const sessionRef = database.ref('sessions/' + currentSessionId);
 
         // Listen for changes to update in real-time
-        sessionRef.on('value', (snapshot) => {
+        sessionRef.on('value', async (snapshot) => {
             const sessionData = snapshot.val();
 
             if (!sessionData) {
@@ -380,9 +400,22 @@ async function loadResults() {
                 document.getElementById('loadingMessage').classList.add('hidden');
                 document.getElementById('resultsSection').classList.remove('hidden');
 
-                // Calculate and display assignments
-                const assignments = calculateAssignments(players, sessionData.factions, votes);
-                displayAssignments(assignments, votes);
+                // Check if results already exist in database
+                if (sessionData.results) {
+                    // Use stored results
+                    displayAssignments(sessionData.results, votes);
+                } else {
+                    // Calculate results for the first time and store them
+                    const assignments = calculateAssignments(players, sessionData.factions, votes);
+                    try {
+                        await database.ref(`sessions/${currentSessionId}/results`).set(assignments);
+                        displayAssignments(assignments, votes);
+                    } catch (error) {
+                        // If write fails (e.g., someone else already wrote), just display what we calculated
+                        console.log('Results may have been calculated by another client');
+                        displayAssignments(assignments, votes);
+                    }
+                }
             } else {
                 document.getElementById('loadingMessage').classList.remove('hidden');
                 document.getElementById('resultsSection').classList.add('hidden');
