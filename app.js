@@ -222,9 +222,9 @@ async function loadSession() {
             playerSelect.innerHTML += `<option value="${player}">${player}</option>`;
         });
 
-        // Store factions for voting
+        // Store factions and voted status for voting
         window.sessionFactions = sessionData.factions;
-        window.sessionVotes = sessionData.votes || {};
+        window.sessionVotedStatus = sessionData.votedStatus || {};
     } catch (error) {
         console.error('Error loading session:', error);
         alert('Error loading session');
@@ -239,7 +239,7 @@ function enableVoting() {
     if (!selectedPlayer) return;
 
     // Check if player already voted
-    if (window.sessionVotes && window.sessionVotes[selectedPlayer]) {
+    if (window.sessionVotedStatus && window.sessionVotedStatus[selectedPlayer] === true) {
         alert('You have already voted!');
         document.getElementById('votingSection').classList.add('hidden');
         document.getElementById('voteConfirmation').classList.remove('hidden');
@@ -322,12 +322,13 @@ async function submitVote() {
         .map(select => select.value)
         .filter(value => value !== ''); // Only include actual preferences, not "No Preference"
 
-    // Firebase doesn't store empty arrays or null (deletes the node)
-    // Use array with single null element as sentinel for "no preferences"
-    const voteData = ranking.length > 0 ? ranking : [null];
-
     try {
-        await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(voteData);
+        // Store the vote (can be empty array for no preferences)
+        // Also set a votedStatus flag to track that this player has voted
+        await Promise.all([
+            database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(ranking),
+            database.ref(`sessions/${currentSessionId}/votedStatus/${selectedPlayer}`).set(true)
+        ]);
 
         // Check if this was the last vote and calculate results if needed
         const sessionSnapshot = await database.ref(`sessions/${currentSessionId}`).once('value');
@@ -335,7 +336,7 @@ async function submitVote() {
 
         if (sessionData) {
             const allVoted = sessionData.players.every(player =>
-                sessionData.votes && (player in sessionData.votes)
+                sessionData.votedStatus && sessionData.votedStatus[player] === true
             );
 
             // If all votes are in and results don't exist, calculate and store them
@@ -374,19 +375,20 @@ async function loadResults() {
 
             const players = sessionData.players;
             const votes = sessionData.votes || {};
-            const votedPlayers = Object.keys(votes);
+            const votedStatus = sessionData.votedStatus || {};
 
             // Update voting status
             const statusDiv = document.getElementById('votingStatus');
             statusDiv.innerHTML = players.map(player => {
-                const voted = votedPlayers.includes(player);
+                const voted = votedStatus[player] === true;
                 return `<div class="status-item ${voted ? 'voted' : 'pending'}">
                     ${player}: ${voted ? '✓ Voted' : 'Waiting...'}
                 </div>`;
             }).join('');
 
             // Check if all players voted
-            if (votedPlayers.length === players.length) {
+            const allVoted = players.every(player => votedStatus[player] === true);
+            if (allVoted) {
                 document.getElementById('loadingMessage').classList.add('hidden');
                 document.getElementById('resultsSection').classList.remove('hidden');
 
@@ -426,9 +428,8 @@ function calculateAssignments(players, factions, votes) {
     // Create preference matrix
     const preferences = {};
     players.forEach(player => {
-        const vote = votes[player] || [];
-        // Convert [null] sentinel to empty array (no preferences)
-        preferences[player] = (vote.length === 1 && vote[0] === null) ? [] : vote;
+        // Empty arrays mean no preferences
+        preferences[player] = votes[player] || [];
     });
 
     // Assign factions iteratively
@@ -489,9 +490,8 @@ function displayAssignments(assignments, votes) {
     const allVotesList = document.getElementById('allVotesList');
     allVotesList.innerHTML = Object.entries(votes)
         .map(([player, ranking]) => {
-            // Check if it's a "no preferences" vote ([null] sentinel)
-            const isNoPreference = ranking && ranking.length === 1 && ranking[0] === null;
-            const hasPreferences = ranking && ranking.length > 0 && !isNoPreference;
+            // Empty arrays or missing votes mean no preferences
+            const hasPreferences = ranking && ranking.length > 0;
 
             const rankingDisplay = hasPreferences
                 ? `<ol>${ranking.map(faction => `<li>${faction}</li>`).join('')}</ol>`

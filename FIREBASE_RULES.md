@@ -17,7 +17,17 @@ Use these rules for the FactionPicker Firebase Realtime Database:
           "$playerId": {
             // Allow each player to vote once (prevents duplicate voting)
             ".write": "!data.exists()"
-            // No validation - empty arrays are valid (means "no preference for any faction")
+            // No validation - arrays can be empty (means "no preference for any faction")
+          }
+        },
+
+        "votedStatus": {
+          "$playerId": {
+            // Allow setting voted status once per player
+            ".write": "!data.exists()",
+
+            // Validate that it's a boolean true value
+            ".validate": "newData.val() === true"
           }
         },
 
@@ -36,13 +46,16 @@ Use these rules for the FactionPicker Firebase Realtime Database:
 
 ## Key Changes
 
-**Removed validation on votes:**
-- Previously had `.validate: "newData.hasChildren()"` which rejected certain vote values
-- Now allows all vote formats without validation
-- Note: Firebase Realtime Database doesn't store empty arrays or null values - they delete the node
-- Votes can be: an array of faction names (preferences) or `[null]` (sentinel for "no preferences")
-- The `[null]` sentinel is a workaround since Firebase deletes nodes set to null or []
-- This is a valid vote state and needs to be recorded so results can be calculated
+**Added separate `votedStatus` tracking:**
+- Uses a boolean flag (`votedStatus/{playerId}: true`) to track who has voted
+- This avoids relying on vote data existence, which can be problematic with empty arrays
+- Votes can be empty arrays (no preferences) or arrays with faction names (preferences)
+- The `votedStatus` flag is set atomically with the vote submission
+- All "has voted" checks use `votedStatus` instead of checking if votes exist
+
+**Vote validation:**
+- No validation on votes - arrays can be empty (represents "no preference for any faction")
+- `votedStatus` must be exactly `true` (boolean validation)
 
 ## What These Rules Allow
 
@@ -51,13 +64,19 @@ Use these rules for the FactionPicker Firebase Realtime Database:
 - Sessions are immutable after creation (players/factions can't be changed)
 
 **Votes Level:**
-- Each player can vote exactly once
-- Votes can be empty arrays (all "No Preference")
+- Each player can submit their vote once
+- Votes can be empty arrays (no preferences) or contain faction names
 - Votes cannot be modified after submission
 
+**Voted Status Level:**
+- Each player can set their voted status once (to `true`)
+- This flag indicates the player has completed voting
+- Cannot be modified after being set
+
 **Results Level:**
-- Results can only be written once
+- Results can only be written once (when all players have voted)
 - Results must contain data (assignments object)
+- Prevents recalculation and ensures consistent random tie-breaking
 
 ## To Apply
 
