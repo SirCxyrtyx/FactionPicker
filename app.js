@@ -322,8 +322,11 @@ async function submitVote() {
         .map(select => select.value)
         .filter(value => value !== ''); // Only include actual preferences, not "No Preference"
 
+    // Firebase doesn't store empty arrays, so use null for "no preferences"
+    const voteData = ranking.length > 0 ? ranking : null;
+
     try {
-        await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(ranking);
+        await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(voteData);
 
         // Check if this was the last vote and calculate results if needed
         const sessionSnapshot = await database.ref(`sessions/${currentSessionId}`).once('value');
@@ -482,12 +485,14 @@ function displayAssignments(assignments, votes) {
 
     const allVotesList = document.getElementById('allVotesList');
     allVotesList.innerHTML = Object.entries(votes)
-        .map(([player, ranking]) =>
-            `<div class="vote-item">
+        .map(([player, ranking]) => {
+            const rankingDisplay = ranking && ranking.length > 0
+                ? `<ol>${ranking.map(faction => `<li>${faction}</li>`).join('')}</ol>`
+                : `<p style="color: #888; font-style: italic;">No preferences specified</p>`;
+
+            return `<div class="vote-item">
                 <h4>${player}'s Rankings</h4>
-                <ol>
-                    ${ranking.map(faction => `<li>${faction}</li>`).join('')}
-                </ol>
-            </div>`
-        ).join('');
+                ${rankingDisplay}
+            </div>`;
+        }).join('');
 }
