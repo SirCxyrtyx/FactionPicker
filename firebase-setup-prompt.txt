@@ -1,0 +1,39 @@
+I need to set up a Firebase project for a faction voting web application. The app uses Firebase Realtime Database to store voting sessions, player votes, and results.
+
+Here's what the app does:
+- Creates voting sessions with player names and faction names
+- Each session gets a unique ID in the database
+- Players vote by ranking factions in order of preference
+- Results are calculated when all players have voted
+- Multiple concurrent sessions can exist
+
+Database structure needed:
+```
+sessions/
+  {sessionId}/
+    players: ["Player1", "Player2", ...]
+    factions: ["Faction1", "Faction2", ...]
+    votes: {
+      "Player1": ["Faction2", "Faction1", ...],
+      "Player2": ["Faction1", "Faction3", ...],
+      ...
+    }
+    createdAt: timestamp
+```
+
+Please help me:
+
+1. Create a new Firebase project (or guide me through using an existing one)
+2. Enable Realtime Database and get the database URL
+3. Set up a web app in Firebase and get the configuration object
+4. Provide the exact firebaseConfig object I need to paste into my app.js file
+5. Set up appropriate security rules that:
+   - Allow anyone to create new sessions
+   - Allow anyone to read any session (needed for results viewing)
+   - Allow players to submit their vote once per session
+   - Prevent players from voting multiple times
+   - Prevent modifying votes after submission
+
+6. Explain any additional setup needed (like enabling specific Firebase features, billing requirements, etc.)
+
+Please provide step-by-step instructions I can follow in the Firebase Console, and give me the exact code snippets I need to copy into my application.
