@@ -28,7 +28,6 @@ const database = firebase.database();
 let players = [];
 let factions = [];
 let currentSessionId = null;
-let draggedElement = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -251,7 +250,7 @@ function enableVoting() {
     renderRankingList();
 }
 
-// Render draggable ranking list
+// Render dropdown ranking list
 function renderRankingList() {
     const rankingList = document.getElementById('rankingList');
     rankingList.innerHTML = '';
@@ -259,67 +258,52 @@ function renderRankingList() {
     window.sessionFactions.forEach((faction, index) => {
         const item = document.createElement('div');
         item.className = 'ranking-item';
-        item.draggable = true;
-        item.dataset.faction = faction;
         item.innerHTML = `
             <div class="rank-number">${index + 1}</div>
-            <div class="faction-name">${faction}</div>
-            <div class="drag-handle">⋮⋮</div>
+            <select class="faction-select" data-rank="${index}" onchange="updateAvailableFactions()">
+                <option value="">No Preference</option>
+                ${window.sessionFactions.map(f =>
+                    `<option value="${f}">${f}</option>`
+                ).join('')}
+            </select>
         `;
-
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('drop', handleDrop);
-        item.addEventListener('dragend', handleDragEnd);
 
         rankingList.appendChild(item);
     });
 }
 
-function handleDragStart(e) {
-    draggedElement = this;
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-}
+// Update available factions in dropdowns based on current selections
+function updateAvailableFactions() {
+    const selects = document.querySelectorAll('.faction-select');
+    const selectedFactions = new Set();
 
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-
-    if (draggedElement !== this) {
-        const allItems = [...document.querySelectorAll('.ranking-item')];
-        const draggedIndex = allItems.indexOf(draggedElement);
-        const targetIndex = allItems.indexOf(this);
-
-        if (draggedIndex < targetIndex) {
-            this.parentNode.insertBefore(draggedElement, this.nextSibling);
-        } else {
-            this.parentNode.insertBefore(draggedElement, this);
+    // Collect all selected factions
+    selects.forEach(select => {
+        if (select.value) {
+            selectedFactions.add(select.value);
         }
+    });
 
-        updateRankNumbers();
-    }
+    // Update each dropdown
+    selects.forEach(select => {
+        const currentValue = select.value;
+        const options = select.querySelectorAll('option');
 
-    return false;
-}
-
-function handleDragEnd(e) {
-    this.classList.remove('dragging');
-}
-
-function updateRankNumbers() {
-    const items = document.querySelectorAll('.ranking-item');
-    items.forEach((item, index) => {
-        item.querySelector('.rank-number').textContent = index + 1;
+        options.forEach(option => {
+            if (option.value === '') {
+                // "No Preference" is always enabled
+                option.disabled = false;
+            } else if (option.value === currentValue) {
+                // Current selection is always enabled
+                option.disabled = false;
+            } else if (selectedFactions.has(option.value)) {
+                // Already selected in another dropdown
+                option.disabled = true;
+            } else {
+                // Available for selection
+                option.disabled = false;
+            }
+        });
     });
 }
 
@@ -333,8 +317,10 @@ async function submitVote() {
         return;
     }
 
-    const rankingItems = document.querySelectorAll('.ranking-item');
-    const ranking = Array.from(rankingItems).map(item => item.dataset.faction);
+    const selects = document.querySelectorAll('.faction-select');
+    const ranking = Array.from(selects)
+        .map(select => select.value)
+        .filter(value => value !== ''); // Only include actual preferences, not "No Preference"
 
     try {
         await database.ref(`sessions/${currentSessionId}/votes/${selectedPlayer}`).set(ranking);
