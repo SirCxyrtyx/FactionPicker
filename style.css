@@ -1,0 +1,312 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.view {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+h2 {
+    color: #555;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+h3 {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+input[readonly] {
+    background: #f5f5f5;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.primary-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.secondary-button {
+    background: #6c757d;
+    color: white;
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.input-group button {
+    background: #667eea;
+    color: white;
+}
+
+.item-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f0f0;
+    padding: 8px 12px;
+    border-radius: 20px;
+    margin: 4px;
+    font-size: 14px;
+}
+
+.item-tag button {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 12px;
+}
+
+#playersList, #factionsList {
+    min-height: 40px;
+    margin-bottom: 10px;
+}
+
+.link-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.link-box input {
+    flex: 1;
+}
+
+.link-box button {
+    background: #28a745;
+    color: white;
+}
+
+.instructions {
+    font-size: 14px;
+    color: #888;
+    font-style: italic;
+}
+
+.ranking-list {
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 200px;
+}
+
+.ranking-item {
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.ranking-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.ranking-item.dragging {
+    opacity: 0.5;
+}
+
+.ranking-item .rank-number {
+    background: #667eea;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.ranking-item .faction-name {
+    flex: 1;
+    font-size: 16px;
+    color: #333;
+}
+
+.ranking-item .drag-handle {
+    color: #999;
+    font-size: 20px;
+}
+
+#voteConfirmation {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#voteConfirmation h2 {
+    color: #28a745;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.assignment-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #667eea;
+}
+
+.assignment-item strong {
+    color: #667eea;
+}
+
+.vote-item {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.vote-item h4 {
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.vote-item ol {
+    margin-left: 20px;
+}
+
+.vote-item li {
+    margin-bottom: 5px;
+    color: #555;
+}
+
+#votingStatus {
+    margin-top: 15px;
+}
+
+.status-item {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.status-item.voted {
+    color: #28a745;
+}
+
+.status-item.pending {
+    color: #6c757d;
+}
+
+@media (max-width: 600px) {
+    .view {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+}
