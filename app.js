@@ -334,7 +334,7 @@ async function submitVote() {
 
         if (sessionData) {
             const allVoted = sessionData.players.every(player =>
-                sessionData.votes && sessionData.votes[player]
+                sessionData.votes && (player in sessionData.votes)
             );
 
             // If all votes are in and results don't exist, calculate and store them
