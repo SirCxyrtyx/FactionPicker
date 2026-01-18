@@ -275,33 +275,18 @@ function renderRankingList() {
 // Update available factions in dropdowns based on current selections
 function updateAvailableFactions() {
     const selects = document.querySelectorAll('.faction-select');
-    const selectedFactions = new Set();
 
     // Find first empty position (not selected yet)
     let firstEmptyIndex = -1;
     for (let i = 0; i < selects.length; i++) {
-        // Note: "No Preference" has value === '', but we need to check if it was explicitly selected
-        // We'll treat the first rank or any rank after a selection as "active"
-        // but if it's still at default (empty) and it's not the first enabled rank, it's empty
-
-        // Actually, let's simplify: find first "No Preference" that was selected
         if (selects[i].value === '') {
             firstEmptyIndex = i;
             break;
         }
     }
 
-    // Collect all selected factions
+    // First pass: determine which dropdowns should be enabled and clear disabled ones
     selects.forEach((select, index) => {
-        if (select.value !== '') {
-            selectedFactions.add(select.value);
-        }
-    });
-
-    // Update each dropdown
-    selects.forEach((select, index) => {
-        const currentValue = select.value;
-
         // Determine if this rank should be enabled
         let shouldEnable = false;
 
@@ -334,9 +319,23 @@ function updateAvailableFactions() {
         } else {
             // Enable the dropdown
             select.disabled = false;
+        }
+    });
 
-            // Update options availability
+    // Second pass: collect selected factions from enabled dropdowns only
+    const selectedFactions = new Set();
+    selects.forEach((select) => {
+        if (!select.disabled && select.value !== '') {
+            selectedFactions.add(select.value);
+        }
+    });
+
+    // Third pass: update options availability in enabled dropdowns
+    selects.forEach((select) => {
+        if (!select.disabled) {
+            const currentValue = select.value;
             const options = select.querySelectorAll('option');
+
             options.forEach(option => {
                 if (option.value === '') {
                     // "No Preference" is always enabled
