@@ -6,21 +6,42 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c2416 0%, #4a3f2a 50%, #2c2416 100%);
+    background-attachment: fixed;
     min-height: 100vh;
     padding: 20px;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(218, 165, 32, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(184, 134, 11, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .view {
-    background: white;
-    border-radius: 12px;
+    background: linear-gradient(to bottom, #f4e8d0 0%, #e8dcc4 100%);
+    border-radius: 2px;
     padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(139, 90, 43, 0.3);
 }
 
 .hidden {
@@ -28,25 +49,31 @@ body {
 }
 
 h1 {
-    color: #333;
+    color: #1a1410;
     margin-bottom: 10px;
     font-size: 2.5em;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 h2 {
-    color: #555;
+    color: #2c2416;
     margin-bottom: 15px;
     font-size: 1.5em;
+    font-weight: 400;
+    letter-spacing: 1px;
 }
 
 h3 {
-    color: #666;
+    color: #3d3020;
     margin-bottom: 10px;
     font-size: 1.2em;
+    font-weight: 400;
 }
 
 p {
-    color: #666;
+    color: #4a3f2a;
     margin-bottom: 20px;
 }
 
@@ -63,48 +90,58 @@ p {
 input[type="text"] {
     flex: 1;
     padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid #8b6f47;
+    border-radius: 1px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    background: rgba(255, 255, 255, 0.8);
+    color: #2c2416;
+    transition: all 0.3s;
 }
 
 input[type="text"]:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #d4844c;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(212, 132, 76, 0.1);
 }
 
 input[readonly] {
-    background: #f5f5f5;
+    background: rgba(228, 216, 196, 0.5);
+    color: #5a4a35;
 }
 
 select {
     width: 100%;
     padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid #8b6f47;
+    border-radius: 1px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    background: rgba(255, 255, 255, 0.8);
+    color: #2c2416;
+    transition: all 0.3s;
 }
 
 select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #d4844c;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(212, 132, 76, 0.1);
 }
 
 button {
     padding: 12px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: 1px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s;
     font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
 button:active {
@@ -112,45 +149,72 @@ button:active {
 }
 
 .primary-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(to bottom, #d4844c 0%, #c0693d 100%);
+    color: #fff;
     width: 100%;
     padding: 16px;
     font-size: 18px;
     margin-top: 20px;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.primary-button:hover {
+    background: linear-gradient(to bottom, #e09058 0%, #d4844c 100%);
 }
 
 .secondary-button {
-    background: #6c757d;
-    color: white;
+    background: linear-gradient(to bottom, #5a4a35 0%, #4a3f2a 100%);
+    color: #f4e8d0;
     width: 100%;
     padding: 16px;
     font-size: 18px;
     margin-top: 20px;
+    border: 1px solid rgba(139, 90, 43, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.secondary-button:hover {
+    background: linear-gradient(to bottom, #6b5a45 0%, #5a4a35 100%);
 }
 
 .input-group button {
-    background: #667eea;
-    color: white;
+    background: linear-gradient(to bottom, #8b6f47 0%, #7a5f3a 100%);
+    color: #f4e8d0;
+    border: 1px solid rgba(139, 90, 43, 0.3);
+}
+
+.input-group button:hover {
+    background: linear-gradient(to bottom, #9b7f57 0%, #8b6f47 100%);
 }
 
 .item-tag {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #f0f0f0;
+    background: rgba(139, 111, 71, 0.15);
     padding: 8px 12px;
-    border-radius: 20px;
+    border-radius: 1px;
     margin: 4px;
     font-size: 14px;
+    color: #3d3020;
+    border: 1px solid rgba(139, 111, 71, 0.3);
 }
 
 .item-tag button {
-    background: #dc3545;
-    color: white;
+    background: linear-gradient(to bottom, #a0522d 0%, #8b4513 100%);
+    color: #f4e8d0;
     padding: 4px 8px;
     font-size: 12px;
-    border-radius: 12px;
+    border-radius: 1px;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+.item-tag button:hover {
+    background: linear-gradient(to bottom, #b5633d 0%, #a0522d 100%);
 }
 
 #playersList, #factionsList {
@@ -169,30 +233,35 @@ button:active {
 }
 
 .link-box button {
-    background: #28a745;
-    color: white;
+    background: linear-gradient(to bottom, #8b6f47 0%, #7a5f3a 100%);
+    color: #f4e8d0;
+    border: 1px solid rgba(139, 90, 43, 0.3);
+}
+
+.link-box button:hover {
+    background: linear-gradient(to bottom, #9b7f57 0%, #8b6f47 100%);
 }
 
 .instructions {
     font-size: 14px;
-    color: #888;
+    color: #5a4a35;
     font-style: italic;
 }
 
 .ranking-list {
-    background: #f8f9fa;
-    border: 2px solid #ddd;
-    border-radius: 8px;
+    background: rgba(139, 111, 71, 0.08);
+    border: 1px solid rgba(139, 111, 71, 0.3);
+    border-radius: 1px;
     padding: 20px;
     min-height: 200px;
 }
 
 .ranking-item {
-    background: white;
+    background: linear-gradient(to right, rgba(244, 232, 208, 0.8) 0%, rgba(228, 216, 196, 0.8) 100%);
     padding: 12px 15px;
     margin-bottom: 10px;
-    border-radius: 6px;
-    border: 2px solid #ddd;
+    border-radius: 1px;
+    border: 1px solid rgba(139, 111, 71, 0.4);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -200,49 +269,54 @@ button:active {
 }
 
 .ranking-item:hover {
-    border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    border-color: #d4844c;
+    box-shadow: 0 2px 6px rgba(212, 132, 76, 0.2);
+    background: linear-gradient(to right, rgba(255, 243, 224, 0.9) 0%, rgba(244, 232, 208, 0.9) 100%);
 }
 
 .ranking-item .rank-number {
-    background: #667eea;
-    color: white;
+    background: linear-gradient(to bottom, #d4844c 0%, #c0693d 100%);
+    color: #fff;
     width: 35px;
     height: 35px;
-    border-radius: 50%;
+    border-radius: 1px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     flex-shrink: 0;
     font-size: 16px;
+    border: 1px solid rgba(139, 69, 19, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .ranking-item .faction-select {
     flex: 1;
     padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid #8b6f47;
+    border-radius: 1px;
     font-size: 16px;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c2416;
     cursor: pointer;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
 }
 
 .ranking-item .faction-select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #d4844c;
+    box-shadow: 0 0 0 2px rgba(212, 132, 76, 0.1);
 }
 
 .ranking-item .faction-select:disabled {
-    background: #f5f5f5;
-    color: #999;
+    background: rgba(228, 216, 196, 0.4);
+    color: #998877;
     cursor: not-allowed;
-    border-color: #e0e0e0;
+    border-color: rgba(139, 111, 71, 0.2);
 }
 
 .ranking-item .faction-select option:disabled {
-    color: #ccc;
+    color: #bbb;
 }
 
 #voteConfirmation {
@@ -251,34 +325,45 @@ button:active {
 }
 
 #voteConfirmation h2 {
-    color: #28a745;
+    color: #8b6f47;
     font-size: 2em;
     margin-bottom: 20px;
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+#voteConfirmation p {
+    color: #5a4a35;
 }
 
 .assignment-item {
-    background: #f8f9fa;
+    background: linear-gradient(to right, rgba(244, 232, 208, 0.6) 0%, rgba(228, 216, 196, 0.6) 100%);
     padding: 15px;
     margin-bottom: 10px;
-    border-radius: 6px;
-    border-left: 4px solid #667eea;
+    border-radius: 1px;
+    border-left: 3px solid #d4844c;
+    border: 1px solid rgba(139, 111, 71, 0.3);
+    border-left: 3px solid #d4844c;
 }
 
 .assignment-item strong {
-    color: #667eea;
+    color: #2c2416;
+    font-weight: 600;
 }
 
 .vote-item {
-    background: white;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(244, 232, 208, 0.4) 100%);
     padding: 15px;
     margin-bottom: 15px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
+    border-radius: 1px;
+    border: 1px solid rgba(139, 111, 71, 0.3);
 }
 
 .vote-item h4 {
-    color: #667eea;
+    color: #2c2416;
     margin-bottom: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 .vote-item ol {
@@ -287,7 +372,11 @@ button:active {
 
 .vote-item li {
     margin-bottom: 5px;
-    color: #555;
+    color: #4a3f2a;
+}
+
+.vote-item p {
+    color: #8b6f47;
 }
 
 #votingStatus {
@@ -297,16 +386,20 @@ button:active {
 .status-item {
     padding: 8px;
     margin-bottom: 5px;
-    background: #f8f9fa;
-    border-radius: 4px;
+    background: rgba(139, 111, 71, 0.08);
+    border-radius: 1px;
+    border-left: 2px solid transparent;
 }
 
 .status-item.voted {
-    color: #28a745;
+    color: #7a5f3a;
+    border-left-color: #8b6f47;
+    font-weight: 500;
 }
 
 .status-item.pending {
-    color: #6c757d;
+    color: #998877;
+    border-left-color: rgba(139, 111, 71, 0.3);
 }
 
 @media (max-width: 600px) {
