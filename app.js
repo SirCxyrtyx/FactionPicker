@@ -446,38 +446,29 @@ function hungarianAlgorithm(costMatrix) {
         }
     }
 
-    // Find optimal assignment using augmenting path method
-    const assignment = new Array(n).fill(-1);
-    const colAssigned = new Array(m).fill(false);
+    // Find assignment using augmenting paths
+    const rowMatch = new Array(n).fill(-1);
+    const colMatch = new Array(m).fill(-1);
 
-    // Try to assign each row
-    for (let i = 0; i < n; i++) {
+    for (let row = 0; row < n; row++) {
         const visited = new Array(m).fill(false);
-        findAugmentingPath(i, matrix, assignment, colAssigned, visited);
+        augment(row, matrix, rowMatch, colMatch, visited);
     }
 
-    return assignment;
+    return rowMatch;
 }
 
-function findAugmentingPath(row, matrix, assignment, colAssigned, visited) {
+function augment(row, matrix, rowMatch, colMatch, visited) {
     const m = matrix[0].length;
 
     for (let col = 0; col < m; col++) {
         if (matrix[row][col] === 0 && !visited[col]) {
             visited[col] = true;
 
-            if (!colAssigned[col]) {
-                // Found an unassigned column
-                assignment[row] = col;
-                colAssigned[col] = true;
+            if (colMatch[col] === -1 || augment(colMatch[col], matrix, rowMatch, colMatch, visited)) {
+                rowMatch[row] = col;
+                colMatch[col] = row;
                 return true;
-            } else {
-                // Try to reassign the currently assigned row
-                const assignedRow = assignment.indexOf(col);
-                if (assignedRow !== -1 && findAugmentingPath(assignedRow, matrix, assignment, colAssigned, visited)) {
-                    assignment[row] = col;
-                    return true;
-                }
             }
         }
     }
@@ -496,7 +487,6 @@ function calculateAssignments(players, factions, votes) {
     // Build cost matrix
     // Rows = players, Columns = factions
     // Cost = rank in preference (lower is better)
-    // If not ranked, use high penalty
     const costMatrix = [];
 
     players.forEach(player => {
@@ -510,34 +500,35 @@ function calculateAssignments(players, factions, votes) {
                 row.push(rank);
             } else {
                 // Player didn't rank this faction - assign high cost
-                row.push(factions.length + 1);
+                // Use a large value but not too large to avoid overflow
+                row.push(factions.length * 2);
             }
         });
 
         costMatrix.push(row);
     });
 
-    // Pad matrix if needed (make it square for Hungarian algorithm)
+    // Pad matrix to make it square (Hungarian algorithm requires square matrix)
     const maxDim = Math.max(players.length, factions.length);
 
     // Pad rows (add dummy players)
     while (costMatrix.length < maxDim) {
-        costMatrix.push(new Array(factions.length).fill(factions.length + 1));
+        costMatrix.push(new Array(costMatrix[0].length).fill(maxDim * 2));
     }
 
     // Pad columns (add dummy factions)
     costMatrix.forEach(row => {
         while (row.length < maxDim) {
-            row.push(maxDim + 1);
+            row.push(maxDim * 2);
         }
     });
 
     // Run Hungarian algorithm
-    const assignment = hungarianAlgorithm(costMatrix);
+    const rowMatch = hungarianAlgorithm(costMatrix);
 
     // Convert assignment array to player->faction mapping
     for (let i = 0; i < players.length; i++) {
-        const factionIndex = assignment[i];
+        const factionIndex = rowMatch[i];
         if (factionIndex !== -1 && factionIndex < factions.length) {
             assignments[players[i]] = factions[factionIndex];
         }
