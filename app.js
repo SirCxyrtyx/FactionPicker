@@ -419,60 +419,129 @@ async function loadResults() {
     }
 }
 
-// Calculate faction assignments
-function calculateAssignments(players, factions, votes) {
-    const assignments = {};
-    const availableFactions = [...factions];
-    const unassignedPlayers = [...players];
+// Hungarian Algorithm implementation for optimal assignment
+function hungarianAlgorithm(costMatrix) {
+    const n = costMatrix.length;
+    if (n === 0) return [];
 
-    // Create preference matrix
-    const preferences = {};
-    players.forEach(player => {
-        // Empty arrays mean no preferences
-        preferences[player] = votes[player] || [];
-    });
+    const m = costMatrix[0].length;
+    const matrix = costMatrix.map(row => [...row]); // Deep copy
 
-    // Assign factions iteratively
-    while (unassignedPlayers.length > 0 && availableFactions.length > 0) {
-        let bestMatch = null;
-        let bestRank = Infinity;
-        let tiedMatches = [];
-
-        // Find the best preference rank among all unassigned players
-        unassignedPlayers.forEach(player => {
-            const playerPrefs = preferences[player];
-
-            availableFactions.forEach(faction => {
-                const rank = playerPrefs.indexOf(faction);
-                const effectiveRank = rank === -1 ? playerPrefs.length : rank;
-
-                if (effectiveRank < bestRank) {
-                    bestRank = effectiveRank;
-                    tiedMatches = [{ player, faction }];
-                } else if (effectiveRank === bestRank) {
-                    tiedMatches.push({ player, faction });
-                }
-            });
-        });
-
-        // Break ties randomly
-        const chosen = tiedMatches[Math.floor(Math.random() * tiedMatches.length)];
-
-        if (chosen) {
-            assignments[chosen.player] = chosen.faction;
-            unassignedPlayers.splice(unassignedPlayers.indexOf(chosen.player), 1);
-            availableFactions.splice(availableFactions.indexOf(chosen.faction), 1);
-        } else {
-            break;
+    // Step 1: Subtract row minimums
+    for (let i = 0; i < n; i++) {
+        const rowMin = Math.min(...matrix[i]);
+        for (let j = 0; j < m; j++) {
+            matrix[i][j] -= rowMin;
         }
     }
 
-    // Assign remaining players to remaining factions randomly
-    unassignedPlayers.forEach((player, index) => {
-        if (availableFactions[index]) {
-            assignments[player] = availableFactions[index];
+    // Step 2: Subtract column minimums
+    for (let j = 0; j < m; j++) {
+        let colMin = Infinity;
+        for (let i = 0; i < n; i++) {
+            colMin = Math.min(colMin, matrix[i][j]);
+        }
+        for (let i = 0; i < n; i++) {
+            matrix[i][j] -= colMin;
+        }
+    }
+
+    // Find optimal assignment using augmenting path method
+    const assignment = new Array(n).fill(-1);
+    const colAssigned = new Array(m).fill(false);
+
+    // Try to assign each row
+    for (let i = 0; i < n; i++) {
+        const visited = new Array(m).fill(false);
+        findAugmentingPath(i, matrix, assignment, colAssigned, visited);
+    }
+
+    return assignment;
+}
+
+function findAugmentingPath(row, matrix, assignment, colAssigned, visited) {
+    const m = matrix[0].length;
+
+    for (let col = 0; col < m; col++) {
+        if (matrix[row][col] === 0 && !visited[col]) {
+            visited[col] = true;
+
+            if (!colAssigned[col]) {
+                // Found an unassigned column
+                assignment[row] = col;
+                colAssigned[col] = true;
+                return true;
+            } else {
+                // Try to reassign the currently assigned row
+                const assignedRow = assignment.indexOf(col);
+                if (assignedRow !== -1 && findAugmentingPath(assignedRow, matrix, assignment, colAssigned, visited)) {
+                    assignment[row] = col;
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// Calculate faction assignments using Hungarian algorithm
+function calculateAssignments(players, factions, votes) {
+    const assignments = {};
+
+    if (players.length === 0 || factions.length === 0) {
+        return assignments;
+    }
+
+    // Build cost matrix
+    // Rows = players, Columns = factions
+    // Cost = rank in preference (lower is better)
+    // If not ranked, use high penalty
+    const costMatrix = [];
+
+    players.forEach(player => {
+        const playerVote = votes[player] || [];
+        const row = [];
+
+        factions.forEach(faction => {
+            const rank = playerVote.indexOf(faction);
+            if (rank !== -1) {
+                // Player ranked this faction at position 'rank' (0 = first choice)
+                row.push(rank);
+            } else {
+                // Player didn't rank this faction - assign high cost
+                row.push(factions.length + 1);
+            }
+        });
+
+        costMatrix.push(row);
+    });
+
+    // Pad matrix if needed (make it square for Hungarian algorithm)
+    const maxDim = Math.max(players.length, factions.length);
+
+    // Pad rows (add dummy players)
+    while (costMatrix.length < maxDim) {
+        costMatrix.push(new Array(factions.length).fill(factions.length + 1));
+    }
+
+    // Pad columns (add dummy factions)
+    costMatrix.forEach(row => {
+        while (row.length < maxDim) {
+            row.push(maxDim + 1);
         }
     });
+
+    // Run Hungarian algorithm
+    const assignment = hungarianAlgorithm(costMatrix);
+
+    // Convert assignment array to player->faction mapping
+    for (let i = 0; i < players.length; i++) {
+        const factionIndex = assignment[i];
+        if (factionIndex !== -1 && factionIndex < factions.length) {
+            assignments[players[i]] = factions[factionIndex];
+        }
+    }
 
     return assignments;
 }

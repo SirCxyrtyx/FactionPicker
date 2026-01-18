@@ -51,14 +51,19 @@ Firebase is already configured and ready to use! The configuration values are ob
 
 ## How Assignment Works
 
-The app assigns factions using a greedy algorithm with random tie-breaking:
+The app assigns factions using the **Hungarian algorithm** for optimal assignment:
 
-1. Find all player-faction pairs where the player ranked that faction highest
-2. If there are ties (multiple players with same preference rank), randomly choose one
-3. Assign that pair and remove both from consideration
-4. Repeat until all assignments are made
+1. Creates a cost matrix where each cell represents how much a player wants a faction (based on their ranking)
+2. Uses the Hungarian algorithm to find the assignment that minimizes the total cost
+3. This ensures the best overall satisfaction across all players
 
-This ensures players get their highest-ranked available faction, with fair random selection when preferences conflict.
+**Key benefits:**
+- Finds the mathematically optimal assignment
+- Minimizes total "unhappiness" across all players
+- Deterministic results (same preferences always produce same assignments)
+- Better than greedy approaches when there are competing preferences
+
+For example, if Player A's top choice conflicts with Player B's top choice, but Player A has an acceptable second choice while Player B doesn't, the algorithm will give Player B their top choice and Player A their second choice - optimizing the overall outcome.
 
 ## Local Development
 
