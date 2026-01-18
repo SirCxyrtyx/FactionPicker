@@ -260,7 +260,7 @@ function renderRankingList() {
         item.className = 'ranking-item';
         item.innerHTML = `
             <div class="rank-number">${index + 1}</div>
-            <select class="faction-select" data-rank="${index}" onchange="updateAvailableFactions()">
+            <select class="faction-select" data-rank="${index}" onchange="updateAvailableFactions()" ${index > 0 ? 'disabled' : ''}>
                 <option value="">No Preference</option>
                 ${window.sessionFactions.map(f =>
                     `<option value="${f}">${f}</option>`
@@ -277,17 +277,23 @@ function updateAvailableFactions() {
     const selects = document.querySelectorAll('.faction-select');
     const selectedFactions = new Set();
 
-    // Find first "No Preference" position
-    let firstNoPreferenceIndex = -1;
-    selects.forEach((select, index) => {
-        if (select.value === '' && firstNoPreferenceIndex === -1) {
-            firstNoPreferenceIndex = index;
-        }
-    });
+    // Find first empty position (not selected yet)
+    let firstEmptyIndex = -1;
+    for (let i = 0; i < selects.length; i++) {
+        // Note: "No Preference" has value === '', but we need to check if it was explicitly selected
+        // We'll treat the first rank or any rank after a selection as "active"
+        // but if it's still at default (empty) and it's not the first enabled rank, it's empty
 
-    // Collect all selected factions (before the first "No Preference")
+        // Actually, let's simplify: find first "No Preference" that was selected
+        if (selects[i].value === '') {
+            firstEmptyIndex = i;
+            break;
+        }
+    }
+
+    // Collect all selected factions
     selects.forEach((select, index) => {
-        if (select.value && (firstNoPreferenceIndex === -1 || index < firstNoPreferenceIndex)) {
+        if (select.value !== '') {
             selectedFactions.add(select.value);
         }
     });
@@ -295,10 +301,32 @@ function updateAvailableFactions() {
     // Update each dropdown
     selects.forEach((select, index) => {
         const currentValue = select.value;
-        const isAfterNoPreference = firstNoPreferenceIndex !== -1 && index > firstNoPreferenceIndex;
 
-        if (isAfterNoPreference) {
-            // Disable and reset to "No Preference" if after first "No Preference"
+        // Determine if this rank should be enabled
+        let shouldEnable = false;
+
+        if (index === 0) {
+            // First rank is always enabled
+            shouldEnable = true;
+        } else if (index > 0) {
+            // Enable this rank if the previous rank has a selection
+            const prevSelect = selects[index - 1];
+            if (prevSelect.value !== '') {
+                // Previous rank has a faction selected
+                shouldEnable = true;
+            } else {
+                // Previous rank is still "No Preference" (initial state or selected)
+                shouldEnable = false;
+            }
+        }
+
+        // Check if we're after a "No Preference" selection
+        if (firstEmptyIndex !== -1 && index > firstEmptyIndex) {
+            shouldEnable = false;
+        }
+
+        if (!shouldEnable) {
+            // Disable and reset to "No Preference"
             select.disabled = true;
             if (select.value !== '') {
                 select.value = '';
