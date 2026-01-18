@@ -277,33 +277,54 @@ function updateAvailableFactions() {
     const selects = document.querySelectorAll('.faction-select');
     const selectedFactions = new Set();
 
-    // Collect all selected factions
-    selects.forEach(select => {
-        if (select.value) {
+    // Find first "No Preference" position
+    let firstNoPreferenceIndex = -1;
+    selects.forEach((select, index) => {
+        if (select.value === '' && firstNoPreferenceIndex === -1) {
+            firstNoPreferenceIndex = index;
+        }
+    });
+
+    // Collect all selected factions (before the first "No Preference")
+    selects.forEach((select, index) => {
+        if (select.value && (firstNoPreferenceIndex === -1 || index < firstNoPreferenceIndex)) {
             selectedFactions.add(select.value);
         }
     });
 
     // Update each dropdown
-    selects.forEach(select => {
+    selects.forEach((select, index) => {
         const currentValue = select.value;
-        const options = select.querySelectorAll('option');
+        const isAfterNoPreference = firstNoPreferenceIndex !== -1 && index > firstNoPreferenceIndex;
 
-        options.forEach(option => {
-            if (option.value === '') {
-                // "No Preference" is always enabled
-                option.disabled = false;
-            } else if (option.value === currentValue) {
-                // Current selection is always enabled
-                option.disabled = false;
-            } else if (selectedFactions.has(option.value)) {
-                // Already selected in another dropdown
-                option.disabled = true;
-            } else {
-                // Available for selection
-                option.disabled = false;
+        if (isAfterNoPreference) {
+            // Disable and reset to "No Preference" if after first "No Preference"
+            select.disabled = true;
+            if (select.value !== '') {
+                select.value = '';
             }
-        });
+        } else {
+            // Enable the dropdown
+            select.disabled = false;
+
+            // Update options availability
+            const options = select.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value === '') {
+                    // "No Preference" is always enabled
+                    option.disabled = false;
+                } else if (option.value === currentValue) {
+                    // Current selection is always enabled
+                    option.disabled = false;
+                } else if (selectedFactions.has(option.value)) {
+                    // Already selected in another dropdown
+                    option.disabled = true;
+                } else {
+                    // Available for selection
+                    option.disabled = false;
+                }
+            });
+        }
     });
 }
 

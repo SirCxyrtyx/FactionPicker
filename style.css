@@ -234,6 +234,13 @@ button:active {
     border-color: #667eea;
 }
 
+.ranking-item .faction-select:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
 .ranking-item .faction-select option:disabled {
     color: #ccc;
 }
